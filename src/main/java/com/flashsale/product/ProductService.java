@@ -34,4 +34,17 @@ public class ProductService {
 
         return productRepository.save(product);
     }
+
+    public Product updateProduct(Long id, ProductRequest request) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setStock(request.getStock());
+
+        return productRepository.save(product);
+    }
 }
