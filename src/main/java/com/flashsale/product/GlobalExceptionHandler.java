@@ -2,6 +2,8 @@ package com.flashsale.product;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.flashsale.order.InsufficientStockException;
+import org.springframework.http.ResponseEntity;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -12,5 +14,16 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(
                 404,
                 ex.getMessage());
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientStock(
+            InsufficientStockException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                400,
+                ex.getMessage());
+
+        return ResponseEntity.badRequest().body(error);
     }
 }
