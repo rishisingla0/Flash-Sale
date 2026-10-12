@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.flashsale.order.InsufficientStockException;
 import org.springframework.http.ResponseEntity;
+import com.flashsale.order.OrderNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -26,4 +27,11 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(error);
     }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleOrderNotFound(OrderNotFoundException ex) {
+        return new ErrorResponse(404, ex.getMessage());
+    }
+
 }

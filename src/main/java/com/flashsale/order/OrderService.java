@@ -5,6 +5,7 @@ import com.flashsale.product.Product;
 import com.flashsale.product.ProductNotFoundException;
 import com.flashsale.product.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,12 +23,12 @@ public class OrderService {
         this.productRepository = productRepository;
     }
 
+    @Transactional
     public Order createOrder(OrderRequest request) {
 
         // 1. Find the product
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() ->
-                        new ProductNotFoundException("Product not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
         // 2. Check available stock
         if (product.getStock() < request.getQuantity()) {
@@ -55,4 +56,10 @@ public class OrderService {
         // 7. Save order
         return orderRepository.save(order);
     }
+
+    public Order getOrderById(Long id) {
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found"));
+    }
+
 }
