@@ -1,8 +1,7 @@
 
 package com.flashsale.order;
 
-import com.flashsale.product.Product;
-import com.flashsale.product.ProductRepository;
+import com.flashsale.product.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -89,4 +88,29 @@ class OrderServiceTest {
         verify(productRepository).deductStock(10L, 2);
         verify(orderRepository, never()).save(any(Order.class));
     }
+
+    
+@Test
+void createOrderShouldThrowExceptionWhenProductDoesNotExist() {
+    OrderRequest request = new OrderRequest();
+    request.setProductId(999L);
+    request.setQuantity(1);
+
+    when(productRepository.findById(999L))
+            .thenReturn(Optional.empty());
+
+    assertThrows(
+            ProductNotFoundException.class,
+            () -> orderService.createOrder(request)
+    );
+
+    verify(productRepository).findById(999L);
+
+    verify(productRepository, never())
+            .deductStock(anyLong(), anyInt());
+
+    verify(orderRepository, never())
+            .save(any(Order.class));
+}
+
 }
