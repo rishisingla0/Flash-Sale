@@ -26,26 +26,20 @@ public class OrderService {
     @Transactional
     public Order createOrder(OrderRequest request) {
 
-        // 1. Find the product
+        // Find the product
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        // 2. Check available stock
-        if (product.getStock() < request.getQuantity()) {
+        // Calculate total price using the current product price
+        BigDecimal totalPrice = product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
+
+        //Atomically deduct stock
+        int updatedRows = productRepository.deductStock(request.getProductId(), request.getQuantity());
+        if(updatedRows == 0) {
             throw new InsufficientStockException("Insufficient stock");
         }
-
-        // 3. Calculate total price
-        BigDecimal totalPrice = product.getPrice()
-                .multiply(BigDecimal.valueOf(request.getQuantity()));
-
-        // 4. Reduce stock
-        product.setStock(product.getStock() - request.getQuantity());
-
-        // 5. Save updated product
-        productRepository.save(product);
-
-        // 6. Create order
+        
+        // Create order
         Order order = new Order();
         order.setProduct(product);
         order.setQuantity(request.getQuantity());
@@ -53,7 +47,7 @@ public class OrderService {
         order.setStatus(OrderStatus.CONFIRMED);
         order.setCreatedAt(LocalDateTime.now());
 
-        // 7. Save order
+        // Save order
         return orderRepository.save(order);
     }
 
